@@ -100,7 +100,8 @@ def build_training_data(input_path: str, output_path: str) -> None:
         for decoding_idx, decoding_sample in enumerate(item["sampled_indices"]):
             justification = remove_label_pattern(item["Reasoning_traces"][decoding_sample])
             verdict = item["Verdict_list"][decoding_sample].lower()
-            sample_id = str(item["query_id"]) + "_" + chr(97 + decoding_idx)
+            qid = item["query_id"] if "query_id" in item.index else idx
+            sample_id = str(qid) + "_" + chr(97 + decoding_idx)
 
             if len(justification.split()) < 3:
                 continue
