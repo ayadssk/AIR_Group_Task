@@ -1,0 +1,18 @@
+=== IR Ranking Metrics (RM-ranked reasoning traces) ===
+k,Mean Recall@k,Mean Precision@k
+1,0.0852,0.5725
+2,0.1492,0.5687
+3,0.2027,0.5602
+4,0.2532,0.5544
+5,0.3001,0.5494
+
+=== Per-Class Metrics (Verdict_BoN vs Ground Truth) ===
+Class,Precision,Recall,F1-Score,Support
+false,0.7678,0.6627,0.7113,913
+true,0.3593,0.5,0.4182,304
+conflicting,0.4087,0.4151,0.4119,383
+
+=== Aggregate Metrics ===
+Average,Precision,Recall,F1-Score
+macro avg,0.5119,0.5259,0.5138
+weighted avg,0.6042,0.5725,0.584
