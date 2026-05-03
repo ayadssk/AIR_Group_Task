@@ -178,11 +178,7 @@ def build_input_text(
     )
 
 
-def build_training_data(
-    input_path: str,
-    output_path: str,
-    teacher_predictions_path: str | None = None,
-) -> None:
+def build_training_data(input_path: str, output_path: str, teacher_predictions_path=None) -> None:
     random.seed(RANDOM_SEED)
 
     with open(input_path, encoding="utf-8") as f:
@@ -241,15 +237,15 @@ def build_training_data(
                 justification=justification,
             )
 
-            # TeacherScore is the soft distillation target.
-            # If the raw data has score_list, use it.
-            # Otherwise, fall back to softened hard labels.
-            parser.add_argument(
-                "--teacher_predictions",
-                required=False,
-                default=None,
-                help="Path to teacher prediction JSON containing score_list.",
-            )
+            hard_class = 1 if verdict == label else 0
+
+            qid_str = str(qid)
+
+            if qid_str in teacher_scores_by_qid:
+                raw_teacher_score = float(teacher_scores_by_qid[qid_str][trace_idx])
+                teacher_score = 1 / (1 + np.exp(-raw_teacher_score))
+            else:
+                teacher_score = 0.9 if hard_class == 1 else 0.1
 
             final_training_data.append(
                 {
@@ -295,6 +291,13 @@ if __name__ == "__main__":
         "--output",
         required=True,
         help="Path for output JSONL file.",
+    )
+
+    parser.add_argument(
+        "--teacher_predictions",
+        required=False,
+        default=None,
+        help="Path to teacher prediction JSON containing score_list.",
     )
 
     args = parser.parse_args()
