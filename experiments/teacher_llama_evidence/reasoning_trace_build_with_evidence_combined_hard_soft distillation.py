@@ -178,13 +178,30 @@ def build_input_text(
     )
 
 
-def build_training_data(input_path: str, output_path: str) -> None:
+def build_training_data(
+    input_path: str,
+    output_path: str,
+    teacher_predictions_path: str | None = None,
+) -> None:
     random.seed(RANDOM_SEED)
 
     with open(input_path, encoding="utf-8") as f:
         raw = json.load(f)
 
     data = pd.DataFrame(raw)
+
+    teacher_scores_by_qid = {}
+
+    if teacher_predictions_path is not None:
+        with open(teacher_predictions_path, encoding="utf-8") as f:
+            teacher_preds = json.load(f)
+
+        for pred in teacher_preds:
+            qid = pred.get("query_id")
+            if qid is not None and "score_list" in pred:
+                teacher_scores_by_qid[str(qid)] = pred["score_list"]
+
+        print(f"Loaded teacher scores for {len(teacher_scores_by_qid)} claims")
 
     unknown_state = {"counter": 0}
 
@@ -227,15 +244,12 @@ def build_training_data(input_path: str, output_path: str) -> None:
             # TeacherScore is the soft distillation target.
             # If the raw data has score_list, use it.
             # Otherwise, fall back to softened hard labels.
-            hard_class = 1 if verdict == label else 0
-
-            if "score_list" in item.index:
-                teacher_score = float(item["score_list"][trace_idx])
-
-                # Convert any raw score to a 0–1 probability-like value
-                teacher_score = 1 / (1 + np.exp(-teacher_score))
-            else:
-                teacher_score = 0.9 if hard_class == 1 else 0.1
+            parser.add_argument(
+                "--teacher_predictions",
+                required=False,
+                default=None,
+                help="Path to teacher prediction JSON containing score_list.",
+            )
 
             final_training_data.append(
                 {
@@ -285,4 +299,4 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    build_training_data(args.input, args.output)
+    build_training_data(args.input, args.output, args.teacher_predictions)
