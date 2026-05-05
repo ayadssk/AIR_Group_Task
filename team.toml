@@ -2,7 +2,7 @@
 # Fill in all fields, then run: python validate_team.py
 
 # Must exactly match the name under which you registered for CLEF CheckThat! Task 2
-team_name = "AIR2026SS-CheckThat-Task2"
+team_name = "5people"
 
 # Your assigned track number (1–4)
 track = 1
